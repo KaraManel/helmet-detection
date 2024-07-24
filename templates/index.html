@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Upload Video</title>
+</head>
+
+<body>
+    <div>
+        <h1>Upload Video</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="video/mp4">
+            <button type="submit">Upload Video</button>
+        </form>
+    </div>
+    {% if intervals %}
+    <h2>Timestamps of detected heads:</h2>
+    <ul>
+        {% for start, end in intervals %}
+        <li>From {{ start }}s to {{ end }}s</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+
+</html>
