@@ -15,13 +15,12 @@
             <button type="submit">Upload Video</button>
         </form>
     </div>
-    {% if intervals %}
-    <h2>Timestamps of detected heads:</h2>
-    <ul>
-        {% for start, end in intervals %}
-        <li>From {{ start }}s to {{ end }}s</li>
-        {% endfor %}
-    </ul>
+    {% if snapshot_url %}
+    <h2>First detection of a head:</h2>
+    <p>Timestamp: {{ timestamp }}s</p>
+    <img src="{{ snapshot_url }}" alt="Snapshot">
+    {% elif message %}
+    <p>{{ message }}</p>
     {% endif %}
 </body>
 
