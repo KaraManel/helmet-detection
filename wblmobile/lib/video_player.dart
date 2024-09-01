@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'video_upload_service.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -19,7 +20,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late VideoPlayerController _controller;
   final VideoUploadService _videoUploadService = VideoUploadService();
-  List<String>? _frameFilenames = null;
+  List<dynamic>? _frameFilenames = null;
   bool _isError = false;
   bool _isProcessing = false;
 
@@ -48,19 +49,26 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     setState(() {
       _isProcessing = true;
       _isError = false;
-      _frameFilenames = []; 
+      _frameFilenames = [];
     });
 
     try {
-     
-      final List<String> frameFilenames = await _videoUploadService.uploadVideo(
-        'http://192.168.222.40:5000/process_video',
+      // List of base64-encoded image strings
+      final List<String> encodedImages = await _videoUploadService.uploadVideo(
+        'http://192.168.1.72:5000/process_video',
         File(widget.videoPath),
         basename(widget.videoPath),
       );
 
+      // Decode the base64 strings into images
+      final List<Uint8List> decodedImages = encodedImages.map((imageString) {
+        return base64Decode(imageString);
+      }).toList();
+
       setState(() {
-        _frameFilenames = frameFilenames;
+        _frameFilenames = encodedImages.contains("All helmets were worn")
+            ? ["All helmets were worn"]
+            : decodedImages;
         _isProcessing = false;
       });
     } catch (e) {
@@ -156,13 +164,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         enableInfiniteScroll: false,
                         initialPage: 0,
                       ),
-                      items: _frameFilenames!.map((filename) {
+                      items: _frameFilenames!.map((frame) {
                         return Builder(
                           builder: (BuildContext context) {
-                            return Image.asset(
-                              'assets/$filename',
-                              fit: BoxFit.cover,
-                            );
+                            return frame is Uint8List
+                                ? Image.memory(
+                                    frame,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container();
                           },
                         );
                       }).toList(),

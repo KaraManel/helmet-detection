@@ -5,15 +5,13 @@ from flask_cors import CORS
 from ultralytics import YOLO
 import shutil
 from datetime import datetime
+import base64
 
 app = Flask(__name__)
 CORS(app)
 
 # Load YOLOv8 model
 model = YOLO('best74.pt')
-
-# Define a directory to save frames
-FRAMES_DIR = r'..\assets'
 
 # Define the rate of frame capture
 FRAME_SKIP = 20
@@ -29,11 +27,6 @@ def process_video():
 
     cap = cv2.VideoCapture(video_path)
     frames_without_helmet = []
-
-    # Delete the directory if it already exists and recreate it
-    if os.path.exists(FRAMES_DIR):
-        shutil.rmtree(FRAMES_DIR)
-    os.makedirs(FRAMES_DIR)
 
     frame_number = 0
     captured_frame_number = 0  # To keep track of the actual frame number for saving
@@ -58,7 +51,13 @@ def process_video():
                     frame_filename = f"frame_{timestamp}.jpg"
                     frame_path = os.path.join(FRAMES_DIR, frame_filename)
                     cv2.imwrite(frame_path, frame)
-                    frames_without_helmet.append(frame_filename)
+                    
+                    # Convert the saved frame to a base64 string
+                    with open(frame_path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    
+                    # Append the encoded image to the list
+                    frames_without_helmet.append(encoded_string)
                     captured_frame_number += 1
         
         frame_number += 1
@@ -69,7 +68,7 @@ def process_video():
     if not frames_without_helmet:
         return jsonify(["All helmets were worn"]), 200
 
-    # Return list of frame filenames
+    # Return list of base64 encoded images
     return jsonify(frames_without_helmet), 200
 
 if __name__ == '__main__':
