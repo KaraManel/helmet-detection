@@ -38,31 +38,30 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   Future<void> startRecording() async {
-  if (!_controller!.value.isRecordingVideo) {
-    await _controller!.startVideoRecording();
-    setState(() {
-      isRecording = true;
-    });
+    if (!_controller!.value.isRecordingVideo) {
+      await _controller!.startVideoRecording();
+      setState(() {
+        isRecording = true;
+      });
+    }
   }
-}
 
-Future<void> stopRecording() async {
-  if (_controller!.value.isRecordingVideo) {
-    XFile videoFile = await _controller!.stopVideoRecording();
-    setState(() {
-      isRecording = false;
-    });
+  Future<void> stopRecording() async {
+    if (_controller!.value.isRecordingVideo) {
+      XFile videoFile = await _controller!.stopVideoRecording();
+      setState(() {
+        isRecording = false;
+      });
 
-    print('Video recorded to: ${videoFile.path}');
+      print('Video recorded to: ${videoFile.path}');
       Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VideoPlayerScreen(videoPath: videoFile.path),
-      ),
-    );
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerScreen(videoPath: videoFile.path),
+        ),
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
