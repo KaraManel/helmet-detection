@@ -53,24 +53,30 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
 
     try {
-      // List of base64-encoded image strings
+      // Send the video to the Flask server and receive the response.
       final List<String> encodedImages = await _videoUploadService.uploadVideo(
         'http://192.168.1.72:5000/process_video',
         File(widget.videoPath),
         basename(widget.videoPath),
       );
 
-      // Decode the base64 strings into images
-      final List<Uint8List> decodedImages = encodedImages.map((imageString) {
-        return base64Decode(imageString);
-      }).toList();
+      // Check if the response contains the string indicating all helmets were worn.
+      if (encodedImages.contains("All helmets were worn")) {
+        setState(() {
+          _frameFilenames = ["All helmets were worn"];
+          _isProcessing = false;
+        });
+      } else {
+        // Decode the base64 strings into images.
+        final List<Uint8List> decodedImages = encodedImages.map((imageString) {
+          return base64Decode(imageString);
+        }).toList();
 
-      setState(() {
-        _frameFilenames = encodedImages.contains("All helmets were worn")
-            ? ["All helmets were worn"]
-            : decodedImages;
-        _isProcessing = false;
-      });
+        setState(() {
+          _frameFilenames = decodedImages;
+          _isProcessing = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isError = true;
