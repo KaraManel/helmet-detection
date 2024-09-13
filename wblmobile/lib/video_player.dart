@@ -53,9 +53,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     });
 
     try {
-      // Send the video to the Flask server and receive the response.
+      // Send the video to the Flask server and receive the response put your ip adress here.
       final List<String> encodedImages = await _videoUploadService.uploadVideo(
-        'http://192.168.1.72:5000/process_video',
+        'your_ip_adress:5000/process_video',
         File(widget.videoPath),
         basename(widget.videoPath),
       );
